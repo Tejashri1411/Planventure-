@@ -14,8 +14,4 @@ bcrypt==4.0.1
 # Database migrations
 Flask-Migrate==4.0.5
 
-# Database
-psycopg2-binary==2.9.9
-
-# Testing
 pytest==8.3.2

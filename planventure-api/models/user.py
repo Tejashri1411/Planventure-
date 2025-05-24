@@ -1,38 +1,39 @@
 from datetime import datetime, timezone
+from flask_jwt_extended import create_access_token
 from app import db
-from werkzeug.security import generate_password_hash, check_password_hash
+from utils.password import hash_password, check_password
 
 class User(db.Model):
-    """User model for storing user account information"""
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(256), nullable=False)
-    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
-    # Add this relationship
-    trips = db.relationship('Trip', backref='owner', lazy=True)
+    # Add relationship
+    trips = db.relationship('Trip', back_populates='user', cascade='all, delete-orphan')
 
-    def set_password(self, password):
-        """Set password hash from plain text password"""
-        self.password_hash = generate_password_hash(password)
+    @property
+    def password(self):
+        raise AttributeError('password is not a readable attribute')
 
-    def check_password(self, password):
-        """Check if provided password matches hash"""
-        return check_password_hash(self.password_hash, password)
+    @password.setter
+    def password(self, password):
+        self.password_hash = hash_password(password)
 
-    def to_dict(self):
-        """Convert user object to dictionary"""
-        return {
-            'id': self.id,
-            'email': self.email,
-            'is_active': self.is_active,
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat()
-        }
+    def verify_password(self, password):
+        return check_password(password, self.password_hash)
+
+    def generate_auth_token(self):
+        """Generate JWT token for the user"""
+        return create_access_token(identity=(str(self.id)))
+
+    @staticmethod
+    def verify_auth_token(token):
+        """Verify the auth token - handled by @auth_required decorator"""
+        pass
 
     def __repr__(self):
         return f'<User {self.email}>'
