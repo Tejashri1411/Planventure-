@@ -9,7 +9,7 @@ flask-jwt-extended==4.5.3
 werkzeug==2.3.7
 
 # Password hashing
-bcrypt==4.0.1
+bcrypt==5.0.0
 
 # Database migrations
 Flask-Migrate==4.0.5
