@@ -12,6 +12,6 @@ werkzeug==2.3.7
 bcrypt==5.0.0
 
 # Database migrations
-Flask-Migrate==4.0.5
+Flask-Migrate==4.1.0
 
 pytest==8.3.2
